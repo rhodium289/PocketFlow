@@ -8,4 +8,8 @@ setup(
     author_email="zh2408@columbia.edu",
     description="Pocket Flow: 100-line LLM framework. Let Agents build Agents!",
     url="https://github.com/The-Pocket/PocketFlow",
+    extras_require={
+        "redis": ["redis>=4.0.0"],
+    },
+    python_requires=">=3.7",
 )

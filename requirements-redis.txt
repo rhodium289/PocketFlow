@@ -1,0 +1,2 @@
+# Redis dependencies for PocketFlow
+redis>=4.0.0

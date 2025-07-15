@@ -98,3 +98,21 @@ class AsyncParallelBatchFlow(AsyncFlow,BatchFlow):
         pr=await self.prep_async(shared) or []
         await asyncio.gather(*(self._orch_async(shared,{**self.params,**bp}) for bp in pr))
         return await self.post_async(shared,pr,None)
+
+# Optional Redis imports - placed after base classes to avoid circular imports
+try:
+    from .redis_backend import (
+        RedisSharedStore, AsyncRedisSharedStore, 
+        RedisQueueManager, AsyncRedisQueueManager,
+        RedisFlow, AsyncRedisFlow, QueueMessage
+    )
+    from .redis_worker import (
+        RedisWorker, AsyncRedisWorker, 
+        WorkerManager, AsyncWorkerManager
+    )
+    REDIS_AVAILABLE = True
+except ImportError as e:
+    # For debugging: print the actual error
+    import sys
+    print(f"Redis import failed: {e}", file=sys.stderr)
+    REDIS_AVAILABLE = False

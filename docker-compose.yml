@@ -1,0 +1,84 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: pocketflow-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  worker1:
+    build: .
+    container_name: pocketflow-worker1
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - WORKER_ID=1
+    command: python cookbook/pocketflow-redis-example/worker.py --worker-id 1 --stats-interval 10
+    volumes:
+      - ./logs:/app/logs
+    restart: "no"
+
+  worker2:
+    build: .
+    container_name: pocketflow-worker2
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - WORKER_ID=2
+    command: python cookbook/pocketflow-redis-example/worker.py --worker-id 2 --stats-interval 10
+    volumes:
+      - ./logs:/app/logs
+    restart: "no"
+
+  job-creator:
+    build: .
+    container_name: pocketflow-job-creator
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: sleep infinity  # Keep container running for manual job creation
+    volumes:
+      - ./logs:/app/logs
+
+  monitor:
+    build: .
+    container_name: pocketflow-monitor
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: python monitor.py
+    restart: "no"
+
+  test-runner:
+    build: .
+    container_name: pocketflow-test
+    depends_on:
+      redis:
+        condition: service_healthy
+      worker1:
+        condition: service_started
+      worker2:
+        condition: service_started
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: python test_redis_system.py
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  redis_data:

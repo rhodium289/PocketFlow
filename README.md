@@ -18,10 +18,13 @@ Pocket Flow is a [100-line](https://github.com/The-Pocket/PocketFlow/blob/main/p
   
 - **Expressive**: Everything you love—([Multi-](https://the-pocket.github.io/PocketFlow/design_pattern/multi_agent.html))[Agents](https://the-pocket.github.io/PocketFlow/design_pattern/agent.html), [Workflow](https://the-pocket.github.io/PocketFlow/design_pattern/workflow.html), [RAG](https://the-pocket.github.io/PocketFlow/design_pattern/rag.html), and more.
 
+- **Scalable**: Redis-based distributed execution with job isolation for production workloads.
+
 - **[Agentic Coding](https://zacharyhuang.substack.com/p/agentic-coding-the-most-fun-way-to)**: Let AI Agents (e.g., Cursor AI) build Agents—10x productivity boost!
 
 Get started with Pocket Flow:
 - To install, ```pip install pocketflow```or just copy the [source code](https://github.com/The-Pocket/PocketFlow/blob/main/pocketflow/__init__.py) (only 100 lines).
+- For distributed processing: ```pip install pocketflow[redis]```
 - To learn more, check out the [documentation](https://the-pocket.github.io/PocketFlow/). To learn the motivation, read the [story](https://zacharyhuang.substack.com/p/i-built-an-llm-framework-in-just).
 - Have questions? Check out this [AI Assistant](https://chatgpt.com/g/g-677464af36588191b9eba4901946557b-pocket-flow-assistant), or [create an issue!](https://github.com/The-Pocket/PocketFlow/issues/new)
 - 🎉 Join our [Discord](https://discord.gg/hUHHE9Sa6T) to connect with other developers building with Pocket Flow!
@@ -61,6 +64,46 @@ From there, it's easy to implement popular design patterns like ([Multi-](https:
   <img src="https://github.com/The-Pocket/.github/raw/main/assets/design.png" width="900"/>
 </div>
 <br>
+
+## Distributed Architecture
+
+For production workloads, PocketFlow supports **Redis-based distributed execution** with complete job isolation:
+
+<div align="center">
+
+```
+[Job Creator] → [Redis Queue] → [Worker 1]
+                              → [Worker 2] 
+                              → [Worker N]
+                                    ↓
+    [Redis Shared Store (per job_id)]
+```
+
+</div>
+
+### Key Benefits:
+- **Scalability**: Add workers across processes/machines
+- **Fault Tolerance**: Jobs persist in Redis if workers fail  
+- **Isolation**: Complete data isolation per job_id
+- **Monitoring**: Track job status and worker performance
+
+### Quick Start:
+```bash
+# Install with Redis support
+pip install pocketflow[redis]
+
+# Start Redis server
+redis-server &
+
+# Run distributed workers
+python worker.py --worker-id 1 &
+python worker.py --worker-id 2 &
+
+# Create and process jobs
+python job_creator.py --num-jobs 10
+```
+
+<br>
 ✨ Below are basic tutorials:
 
 <div align="center">
@@ -92,6 +135,7 @@ From there, it's easy to implement popular design patterns like ([Multi-](https:
 | [FastAPI WebSocket](https://github.com/The-Pocket/PocketFlow/tree/main/cookbook/pocketflow-fastapi-websocket) | ★☆☆ <sup>*Beginner*</sup> | Real-time chat interface with streaming LLM responses via WebSocket |
 | [FastAPI Background](https://github.com/The-Pocket/PocketFlow/tree/main/cookbook/pocketflow-fastapi-background) | ★☆☆ <sup>*Beginner*</sup> | FastAPI app with background jobs and real-time progress via SSE |
 | [Voice Chat](https://github.com/The-Pocket/PocketFlow/tree/main/cookbook/pocketflow-voice-chat) | ★☆☆ <sup>*Beginner*</sup> | An interactive voice chat application with VAD, STT, LLM, and TTS. |
+| [Redis Distributed](https://github.com/The-Pocket/PocketFlow/tree/main/cookbook/pocketflow-redis-example) | ★☆☆ <sup>*Beginner*</sup> | Distributed job processing with Redis backend for scalable workflows |
 
 </div>
 
